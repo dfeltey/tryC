@@ -1,0 +1,7 @@
+TODO
+
+- separate lex and yacc specifcations in grammar,jison into separate files
+
+- get a basic parser up and running as soon as possible
+
+- get site up at tryc.github.com
