@@ -1,10 +1,12 @@
-data MinCType = I Integer
+data MinCType = I Int
 		   	  | F Float
 		   	  | D Double
-		      | C Char
+		      | C 
+		      | S String
 		      | Void
-		      | Pointer MinCType -- maybe pointers don't go here since all the others hold values
-		    --| Array ??? where should arrays go??
+		    -- Leaving out pointers and arrays for now, will add them back in later  
+		    --| Pointer MinCType -- maybe pointers don't go here since all the others hold values
+		    --| Array ??? where should  arrays go??
 		      | EMPTY
 		      | FUN MinCType -- return-val args body
 		      deriving (Eq, Show, Read)
@@ -24,4 +26,5 @@ data MinCStatement = IF -- Test Body Rest
 				   | ASSIGN -- variable and value modify an environment and.or store to hold the new assignment
 				   | DECLARE  -- variable, make space for it in the environment and store?
 				   | EXPR MinCExpr
+				   | Block [MinCStatement]
 				   deriving (Eq, Read, Show)
