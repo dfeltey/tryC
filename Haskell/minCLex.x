@@ -6,13 +6,26 @@ module Main (main) where
 
 $digit = 0-9              -- digits
 $idC   = [_a-zA-Z]		  -- valid identifier characters 
+@char = \'(\\.|[^\\\'\n])+\'
+@str = \"(\\.|[^\\\"\n])*\"
+@float = $digit+\.|\.$digit+|$digit+\.$digit+
+-- Haskell won't parse doubles like 0. or .0, this should be easy to fix with an external function
+-- that checks if . is the first or last character and conses/appends as necessary to make Haskell
+-- parser the double 
+
 
 tokens :- 
 	
 	$white+					;
 	$digit+					{\s -> IntValT (read s)}
+	@float 					{\s -> parseDouble s}
+	@str	   	            {\s -> StringValT (init $ tail s)}
+	@char 					{\s -> CharValT (read s)}
 	int 					{\s -> IntT}
 	float                   {\s -> FloatT}
+	double   				{\s -> DoubleT}
+	char 					{\s -> CharT}
+	string 					{\s -> StringT}
 	if  					{\s -> IfT}
 	else 					{\s -> ElseT}
 	do 						{\s -> DoT}
@@ -30,7 +43,13 @@ tokens :-
 	"<"						{\s -> LessT}
 	">="					{\s -> GreatEqT}
 	">"						{\s -> GreatT}
+	\+						{\s -> PlusT}
+	\*						{\s -> TimesT}
+	\/ 						{\s -> DivideT}
+	\-						{\s -> MinusT}
+	\% 						{\s -> ModT}
 	$idC+					{\s -> IdT s}
+	.						{\s -> ErrorT s}
 
 
 {
@@ -40,6 +59,7 @@ tokens :-
 -- on variable type
 data Token = IdT String
 		   | IntValT Int
+		   | FloatValT Float
 		   | DoubleValT Double
 		   | CharValT Char
 		   | StringValT String
@@ -66,8 +86,21 @@ data Token = IdT String
 		   | GreatT
 		   | LessEqT
 		   | GreatEqT
+		   | PlusT
+		   | MinusT
+		   | TimesT
+		   | DivideT
+		   | ModT
+		   | ErrorT String
 		   deriving(Show)
 
+
+
+parseDouble :: String -> Token
+parseDouble s@('.':xs) = DoubleValT $ read $'0':s
+parseDouble s
+	| last s == '.' = DoubleValT $ read $ s ++ "0"
+	| otherwise = DoubleValT $ read s
 
 main = do
 	s <- getContents
